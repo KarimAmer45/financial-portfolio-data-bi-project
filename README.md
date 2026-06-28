@@ -1,89 +1,106 @@
-# Financial Portfolio Data & BI Project
+# SBA 7(a) Lender Activity Data & BI Project
 
-A Python and SQL workflow over a synthetic loan portfolio. The script cleans the raw data, loads it into SQLite, runs KPI and segment/risk queries, and exports a handful of charts.
+This project demonstrates a compact Business Intelligence workflow using official U.S. Small Business Administration open data. It cleans an SBA 7(a) lender activity workbook, exports analysis-ready CSV files, runs SQL queries, calculates KPIs, and creates a short business readout with visuals.
 
-The dataset is synthetic. It mirrors a financial services loan book with customers, regions, industries, products, payment behavior, balances, risk buckets, and credit indicators.
+The dataset is public, aggregated SBA lending activity data for FY2024. It is not borrower-level credit performance data, so the analysis focuses on lender concentration, geographic exposure, approved loan volume, approved dollars, average loan size, and SBA guaranty exposure.
+
+## Data Source
+
+- Source: U.S. Small Business Administration Open Data
+- Dataset: SBA 7(a) & 504 Activity Reports, FY2024 Year End
+- Raw file used: `lender7aactivity_fy2024_20240930.xlsx`
+- Source URL: https://web.data.sba.gov/en/dataset/7-a-504-activity-reports-fy2024-year-end
 
 ## Tools Used
 
 - Python
 - pandas and numpy
+- openpyxl
 - SQLite SQL
 - Pillow for PNG chart generation
 
 ## Workflow
 
-1. Generate a synthetic loan/customer portfolio dataset.
-2. Clean duplicate loan records and missing values.
-3. Load the cleaned data into SQLite.
-4. Run SQL queries for KPIs, trends, segments, regions, and risk buckets.
-5. Create 4 visuals from the analysis outputs.
-6. Summarize business insights for a BI-style readout.
+1. Load the raw SBA workbook from `data/raw/`.
+2. Clean and standardize lender, county, and district office sheets.
+3. Export cleaned CSV files to `data/processed/`.
+4. Load the cleaned tables into SQLite.
+5. Run SQL queries for KPIs, lender concentration, geographic exposure, and district office activity.
+6. Create BI-style visuals and summarize business insights.
 
 ## Data Cleaning Summary
 
-- Raw dataset: 1,518 rows and 23 columns.
-- Removed 18 duplicate loan records.
-- Filled missing values in industry, credit score, annual revenue, and collateral value fields.
-- Final analysis dataset: 1,500 cleaned loan records with no missing values.
+| Table | Raw rows | Clean rows | Notes |
+| --- | ---: | ---: | --- |
+| Lender activity | 1,472 | 1,472 | Standardized fields and numeric types |
+| Lender-county activity | 20,846 | 20,846 | Standardized lender, state, county, and dollar fields |
+| District office activity | 6,106 | 6,106 | Standardized district office fields |
+
+The selected SBA sheets had no missing values or duplicate rows after cleaning.
 
 ## Key Business Questions
 
-- Which regions hold the largest portfolio exposure?
-- What are the monthly origination trends?
-- Which customer segments show stronger or weaker repayment behavior?
-- Which industries create concentration risk?
-- How much exposure sits in elevated or high-risk buckets?
-- What are the overall delinquency and default rates?
+- Which lenders account for the largest approved SBA 7(a) dollar volume?
+- How concentrated is activity among the top lenders?
+- Which project states and counties drive the most approved dollars?
+- Which SBA district offices show the highest activity?
+- What is the overall SBA guaranty rate?
+- What is the average approved loan size?
 
 ## KPI Summary
 
 | KPI | Value |
 | --- | ---: |
-| Cleaned loan records | 1,500 |
-| Customers | 374 |
-| Total outstanding balance | $1.74B |
-| Average interest rate | 6.17% |
-| 30+ day delinquency rate | 17.00% |
-| Default rate | 3.13% |
-| Weighted average LTV | 0.63 |
-| Elevated/High risk exposure | 10.38% |
+| Approved loans | 70,242 |
+| Approved dollars | $31.12B |
+| SBA guaranty dollars | $22.75B |
+| Active lenders | 1,472 |
+| Project states/territories | 54 |
+| Project counties | 2,402 |
+| Average loan size | $443K |
+| SBA guaranty rate | 73.08% |
+| Top 10 lender share | 33.15% |
 
 ## Key Insights
 
-- Total outstanding portfolio is $1.74B across 1,500 loans and 374 customers.
-- Europe is the largest region by outstanding balance at $563.6M.
-- North America has the strongest repayment profile, with a 1.78% default rate and 12.25% 30+ day delinquency rate.
-- Enterprise is the largest customer segment by exposure, while SME shows the highest default pressure at 5.16%.
-- Manufacturing is the top industry concentration at 19.67% of outstanding balance.
-- Elevated and High risk buckets represent 10.38% of total portfolio exposure.
-- Origination volume peaked in 2023-10 at $114.0M.
+- SBA 7(a) FY2024 activity totals $31.1B across 70,242 approved loans and 1,472 lenders.
+- SBA guaranty exposure totals $22.7B, equal to 73.08% of approved dollars.
+- The top 10 lenders account for 33.15% of approved dollars, showing meaningful but not extreme lender concentration.
+- Newtek Bank, National Association is the largest lender by approved dollars at $2.1B, representing 6.74% of total activity.
+- California is the largest project state at $4.0B, representing 12.93% of approved dollars.
+- Los Angeles County, CA is the largest county exposure at $1.2B.
+- South Florida District Office is the largest SBA district office view at $2.0B.
 
 ## Visuals
 
 ![KPI summary](visuals/kpi_summary.png)
 
-![Monthly origination trend](visuals/monthly_trend.png)
+![Top lenders](visuals/top_lenders.png)
 
-![Customer segment performance](visuals/segment_performance.png)
+![Top project states](visuals/top_project_states.png)
 
-![Risk bucket exposure](visuals/risk_bucket_summary.png)
+![Top district offices](visuals/top_district_offices.png)
 
 ## Repository Structure
 
 ```text
 financial-portfolio-data-bi-project/
 |-- data/
-|   `-- loan_customer_portfolio.csv
+|   |-- raw/
+|   |   `-- lender7aactivity_fy2024_20240930.xlsx
+|   `-- processed/
+|       |-- sba_7a_lender_activity_fy2024.csv
+|       |-- sba_7a_lender_county_activity_fy2024.csv
+|       `-- sba_7a_district_office_activity_fy2024.csv
 |-- sql/
 |   `-- analysis_queries.sql
 |-- notebooks/
 |   `-- analysis.py
 |-- visuals/
 |   |-- kpi_summary.png
-|   |-- monthly_trend.png
-|   |-- segment_performance.png
-|   `-- risk_bucket_summary.png
+|   |-- top_lenders.png
+|   |-- top_project_states.png
+|   `-- top_district_offices.png
 |-- requirements.txt
 `-- README.md
 ```
@@ -95,8 +112,8 @@ pip install -r requirements.txt
 python notebooks/analysis.py
 ```
 
-Running the script regenerates the dataset, executes the SQL analysis, prints the KPI summary and insights, and refreshes the visuals.
+Running the script regenerates the cleaned CSV exports, executes the SQL analysis, prints the KPI summary and insights, and refreshes the visuals.
 
-## Notes
+## Relevance to Data & BI
 
-I put this together to keep my data and BI skills sharp: cleaning structured data, writing SQL for KPIs and portfolio trends, and turning the results into charts and a short readout.
+This project reflects Data and Business Intelligence skills including public data sourcing, spreadsheet ingestion, data cleaning, SQL querying, KPI development, exposure analysis, visualization, and clear business communication.
