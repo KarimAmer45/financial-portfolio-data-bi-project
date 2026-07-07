@@ -2,7 +2,8 @@
 
 End-to-end BI workflow over the SBA 7(a) FY2024 lender activity workbook:
 Python handles ingest and validation, the reporting layer is a star schema,
-dbt rebuilds the same models on DuckDB, and Power BI sits on top.
+dbt rebuilds the same models on DuckDB, and a Power BI semantic model
+sits on top (the report layouts are built in Power BI Desktop).
 
 ## Data Flow
 

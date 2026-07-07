@@ -2,8 +2,8 @@
 
 End-to-end BI workflow over public SBA lending data: Python ingest with
 data-quality gates, a star-schema reporting layer, a dbt project that runs
-the same models on DuckDB, a Power BI report, and a Snowflake migration
-design.
+the same models on DuckDB, a Power BI-ready semantic model with DAX
+measures, and a Snowflake migration design.
 
 ## Business Problem
 
@@ -41,7 +41,8 @@ rather than implying detail the SBA doesn't publish.
 5. The dbt project in `dbt/` rebuilds the same star schema on DuckDB with
    schema tests - the warehouse-native version of step 2.
 6. Power BI (`powerbi/sba_lending.pbip`) loads the warehouse CSVs into a
-   model with relationships and DAX measures already defined.
+   model with relationships and DAX measures already defined. The report
+   pages are named but still empty; layouts get built in Power BI Desktop.
 
 Architecture and model diagrams: [docs/architecture.md](docs/architecture.md)
 
@@ -95,7 +96,8 @@ dbt tests for the warehouse path.
 - Python (pandas, matplotlib): ingest, validation, star schema, charts
 - SQL: SQLite for local analysis queries; DuckDB under dbt
 - dbt: staging / intermediate / marts layers with schema and singular tests
-- Power BI: PBIP project with semantic model and DAX measures
+- Power BI: PBIP project with semantic model and DAX measures (report
+  page layouts still to be built)
 - Snowflake: schema DDL, `COPY INTO` loading, migration notes (design only)
 
 ## Setup
@@ -138,10 +140,13 @@ visuals/         charts rendered by the pipeline
   executed against a live account.
 - District office totals come from a separate source aggregation and don't
   join to the county-grain fact table.
+- The Power BI project is the semantic model, relationships, and measures;
+  the report pages themselves are not laid out yet.
 
 ## Next Steps
 
 - Load a second fiscal year to unlock trend analysis in `dim_date`.
 - Point the dbt profile at Snowflake and materialize the marts there.
 - CI that runs the unit tests and `dbt build` on every push.
-- Finish the Power BI page layouts and publish to the service.
+- Build the report page layouts in Power BI Desktop and publish to the
+  service.

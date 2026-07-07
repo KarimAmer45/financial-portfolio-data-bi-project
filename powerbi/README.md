@@ -1,8 +1,10 @@
-# Power BI Report
+# Power BI Semantic Model
 
 This folder contains a Power BI project (`sba_lending.pbip`) with the semantic
 model already built: all four star-schema tables, the two data-quality tables,
-relationships, and the DAX measures.
+relationships, and the DAX measures. What it does not contain yet is the
+report itself - the four pages are created and named but empty, so the
+visuals still need to be laid out in Power BI Desktop.
 
 ## Opening the project
 
