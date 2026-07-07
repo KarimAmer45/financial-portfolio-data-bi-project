@@ -13,4 +13,14 @@ logs/
 ~$*
 
 # dbt / DuckDB
-dbt/t
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+*.duckdb
+*.duckdb.wal
+
+# Power BI local files
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+*.pbix.tmp
