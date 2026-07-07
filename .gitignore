@@ -1,13 +1,16 @@
+# Python
 __pycache__/
+*.pyc
 .ipynb_checkpoints/
 .venv/
 venv/
-*.pyc
-.agents/
-.codex/
+
+# Local artifacts
 *.log
+logs/
 *.tmp
 *.bak
 ~$*
-*.pbi/cache/
-*.pbi/localSettings.json
+
+# dbt / DuckDB
+dbt/t
