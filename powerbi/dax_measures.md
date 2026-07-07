@@ -1,14 +1,21 @@
 # DAX Measures
 
-```DAX
-Total Approved Dollars =
-SUM(FactLendingActivity[approved_dollars])
-```
+All measures below are already defined on `fact_lending_activity` in the
+semantic model. This file is the readable reference.
+
+Base measures:
 
 ```DAX
-Total Loan Count =
-SUM(FactLendingActivity[approved_loan_count])
+Total Approved Dollars = SUM(fact_lending_activity[approved_dollars])
+
+Total Loan Count = SUM(fact_lending_activity[approved_loan_count])
+
+Total Guaranty Dollars = SUM(fact_lending_activity[guaranty_dollars])
+
+Active Lenders = DISTINCTCOUNT(dim_lender[lender_key])
 ```
+
+Ratios built on the base measures:
 
 ```DAX
 Average Loan Size =
@@ -16,14 +23,7 @@ DIVIDE(
     [Total Approved Dollars],
     [Total Loan Count]
 )
-```
 
-```DAX
-Total Guaranty Dollars =
-SUM(FactLendingActivity[guaranty_dollars])
-```
-
-```DAX
 Guaranty Rate =
 DIVIDE(
     [Total Guaranty Dollars],
@@ -31,57 +31,50 @@ DIVIDE(
 )
 ```
 
+Share measures. `ALL(dim_lender)` removes the lender filter so the
+denominator is always the grand total:
+
 ```DAX
 Lender Share =
 DIVIDE(
     [Total Approved Dollars],
     CALCULATE(
         [Total Approved Dollars],
-        ALL(DimLender)
+        ALL(dim_lender)
     )
 )
-```
 
-```DAX
-Active Lenders =
-DISTINCTCOUNT(DimLender[lender_key])
-```
-
-```DAX
 Top 10 Lender Dollars =
 SUMX(
     TOPN(
         10,
-        ALL(DimLender[lender_name]),
+        ALL(dim_lender[lender_name]),
         [Total Approved Dollars],
         DESC
     ),
     [Total Approved Dollars]
 )
-```
 
-```DAX
 Top 10 Lender Share =
 DIVIDE(
     [Top 10 Lender Dollars],
     CALCULATE(
         [Total Approved Dollars],
-        ALL(DimLender)
+        ALL(dim_lender)
     )
 )
 ```
+
+Data-quality page measures:
 
 ```DAX
 Failed Data Quality Checks =
 COUNTROWS(
     FILTER(
-        DataQualityReport,
-        DataQualityReport[status] <> "pass"
+        data_quality_report,
+        data_quality_report[status] <> "pass"
     )
 )
-```
 
-```DAX
-Rejected Record Count =
-COUNTROWS(RejectedRecords)
+Rejected Record Count = COUNTROWS(rejected_records)
 ```

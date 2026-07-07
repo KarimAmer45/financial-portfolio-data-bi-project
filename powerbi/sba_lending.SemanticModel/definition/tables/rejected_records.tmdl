@@ -1,0 +1,32 @@
+table rejected_records
+	column source_table
+		dataType: string
+		summarizeBy: none
+		sourceColumn: source_table
+	column rejection_reason
+		dataType: string
+		summarizeBy: none
+		sourceColumn: rejection_reason
+	column lender
+		dataType: string
+		summarizeBy: none
+		sourceColumn: lender
+	column approved_loans
+		dataType: double
+		formatString: #,0
+		summarizeBy: sum
+		sourceColumn: approved_loans
+	column approved_dollars
+		dataType: double
+		formatString: \$#,0;(\$#,0);\$#,0
+		summarizeBy: sum
+		sourceColumn: approved_dollars
+	partition rejected_records = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataRoot & "\quality\rejected_records.csv"), [Delimiter = ",", Columns = 5, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    ChangedType = Table.TransformColumnTypes(PromotedHeaders, {{"source_table", type text}, {"rejection_reason", type text}, {"lender", type text}, {"approved_loans", type number}, {"approved_dollars", type number}})
+				in
+				    ChangedType

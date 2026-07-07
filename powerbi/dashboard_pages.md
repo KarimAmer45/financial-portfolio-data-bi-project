@@ -1,57 +1,54 @@
-# Dashboard Page Blueprint
+# Report Page Layout
+
+The PBIP project ships with four empty, named pages. This is the layout each
+page is meant to carry.
 
 ## 1. Executive Overview
 
-Purpose: show the overall SBA 7(a) FY2024 lending activity at a glance.
+The at-a-glance view of FY2024 7(a) activity.
 
-Recommended visuals:
-
-- KPI cards: Total Approved Dollars, Total Loan Count, Average Loan Size, Total Guaranty Dollars, Guaranty Rate, Active Lenders.
-- Bar chart: Top 10 lenders by approved dollars.
-- Filled map or bar chart: Approved dollars by state. Use a bar chart if map geocoding is unreliable.
-- Concentration card: Top 10 Lender Share.
+- KPI cards across the top: Total Approved Dollars, Total Loan Count,
+  Average Loan Size, Total Guaranty Dollars, Guaranty Rate, Active Lenders.
+- Bar chart: top 10 lenders by Total Approved Dollars (`dim_lender[lender_name]`).
+- Bar chart or filled map: approved dollars by `dim_geography[state]`. Prefer
+  the bar chart if map geocoding of two-letter codes is unreliable.
+- Card: Top 10 Lender Share, as the concentration headline.
 
 ## 2. Lender Analysis
 
-Purpose: compare lenders by activity, scale, and concentration.
+Compare lenders on scale and concentration.
 
-Recommended visuals:
-
-- Lender slicer.
-- Bar chart: approved dollars by lender.
-- Bar chart: loan count by lender.
-- Scatter plot: average loan size vs. approved dollars.
-- Table: lender name, approved dollars, loan count, average loan size, guaranty rate, lender share.
+- Slicer: `dim_lender[lender_name]`.
+- Bar chart: Total Approved Dollars by lender.
+- Bar chart: Total Loan Count by lender.
+- Scatter: Average Loan Size vs Total Approved Dollars, one point per lender.
+- Table: lender, Total Approved Dollars, Total Loan Count, Average Loan Size,
+  Guaranty Rate, Lender Share.
 
 ## 3. Geographic Analysis
 
-Purpose: show where approved dollars and loan counts are concentrated.
+Where the dollars land.
 
-Recommended visuals:
-
-- State slicer.
-- Bar chart: approved dollars by state.
-- Bar chart: loan count by state.
-- Table: state, county, approved dollars, loan count, average loan size.
-- Region summary using `DimGeography[region]`.
+- Slicer: `dim_geography[state]`.
+- Bar charts: Total Approved Dollars and Total Loan Count by state.
+- Matrix or bar chart: rollup by `dim_geography[region]`.
+- Table: state, county, Total Approved Dollars, Total Loan Count,
+  Average Loan Size.
 
 ## 4. Data Quality
 
-Purpose: demonstrate operational BI thinking beyond visual design.
+Operational trust page for the model itself.
 
-Recommended visuals:
+- KPI cards: count of fact rows, Failed Data Quality Checks,
+  Rejected Record Count, and `dim_date[reporting_period]` as refresh context.
+- Table: `data_quality_report` with check name, status, failed count, details.
+- Table: `rejected_records`.
 
-- KPI cards: processed fact rows, failed data-quality checks, rejected record count, refresh date.
-- Table: data-quality checks with status, failed count, and details.
-- Table: rejected records.
-- Card: source workbook name and reporting period.
-
-## Refresh Notes
-
-After replacing the SBA workbook, run:
+## Refresh
 
 ```bash
-python notebooks/analysis.py
+python src/run_pipeline.py
 ```
 
-Then refresh the Power BI model from the regenerated CSV files.
+Then Refresh in Power BI Desktop. The pages and measures stay put; only the
+data changes.
