@@ -1,0 +1,46 @@
+{
+  "source_workbook": "data/raw/lender7aactivity_fy2024_20240930.xlsx",
+  "source_url": "https://web.data.sba.gov/en/dataset/7-a-504-activity-reports-fy2024-year-end",
+  "tables": {
+    "sba_lender_activity": {
+      "sheet": "Lender",
+      "required_text": ["lender", "lender_city", "lender_state"],
+      "columns": {
+        "Lender": "lender",
+        "Lender City": "lender_city",
+        "Lender State": "lender_state",
+        "Approved Loans": "approved_loans",
+        "Approved Dollars": "approved_dollars",
+        "Approved SBA Guaranty Dollars": "approved_sba_guaranty_dollars"
+      }
+    },
+    "sba_lender_county_activity": {
+      "sheet": "Lender_ProjCnty",
+      "required_text": ["lender", "lender_city", "lender_state", "project_state", "project_county"],
+      "columns": {
+        "Lender": "lender",
+        "Lender City": "lender_city",
+        "Lender State": "lender_state",
+        "Project State": "project_state",
+        "Project County": "project_county",
+        "Approved Loans": "approved_loans",
+        "Approved Dollars": "approved_dollars",
+        "Approved SBA Guaranty Dollars": "approved_sba_guaranty_dollars"
+      }
+    },
+    "sba_district_office_activity": {
+      "sheet": "Lender_DO",
+      "required_text": ["lender", "lender_city", "lender_state", "do_code", "sba_do_name"],
+      "columns": {
+        "Lender": "lender",
+        "Lender City": "lender_city",
+        "Lender State": "lender_state",
+        "DO Code": "do_code",
+        "SBA DO Name": "sba_do_name",
+        "Approved Loans": "approved_loans",
+        "Approved Dollars": "approved_dollars",
+        "Approved SBA Guaranty Dollars": "approved_sba_guaranty_dollars"
+      }
+    }
+  }
+}

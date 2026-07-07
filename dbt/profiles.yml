@@ -1,0 +1,9 @@
+# Local DuckDB profile. Run from the repository root:
+#   dbt build --project-dir dbt --profiles-dir dbt
+sba_lending:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: dbt/target/sba.duckdb
+      threads: 4

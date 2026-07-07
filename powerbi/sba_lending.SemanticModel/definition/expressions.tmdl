@@ -1,0 +1,2 @@
+expression DataRoot = "C:\Users\karim\Documents\financial-portfolio-data-bi-project\data" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	annotation PBI_ResultType = Text

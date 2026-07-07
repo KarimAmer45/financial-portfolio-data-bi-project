@@ -1,0 +1,16 @@
+name: sba_lending
+version: "1.0"
+profile: sba_lending
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+
+models:
+  sba_lending:
+    staging:
+      +materialized: view
+    intermediate:
+      +materialized: view
+    marts:
+      +materialized: table

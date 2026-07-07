@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: sba_raw
+    description: Cleaned CSV exports produced by the Python pipeline (src/run_pipeline.py).
+    schema: raw
+    meta:
+      external_location: "read_csv_auto('data/processed/{name}.csv', header=true)"
+    tables:
+      - name: sba_7a_lender_activity_fy2024
+        description: FY2024 SBA 7(a) activity aggregated to lender level.
+      - name: sba_7a_lender_county_activity_fy2024
+        description: FY2024 SBA 7(a) activity aggregated to lender by project county.
+      - name: sba_7a_district_office_activity_fy2024
+        description: FY2024 SBA 7(a) activity aggregated to lender by SBA district office.

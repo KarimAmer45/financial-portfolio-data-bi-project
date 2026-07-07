@@ -1,0 +1,35 @@
+table dim_date
+	column date_key
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: date_key
+	column reporting_period
+		dataType: dateTime
+		formatString: Short Date
+		summarizeBy: none
+		sourceColumn: reporting_period
+	column year
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: year
+	column quarter
+		dataType: string
+		summarizeBy: none
+		sourceColumn: quarter
+	column month
+		dataType: int64
+		summarizeBy: none
+		sourceColumn: month
+	column period_label
+		dataType: string
+		summarizeBy: none
+		sourceColumn: period_label
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents(DataRoot & "\warehouse\dim_date.csv"), [Delimiter = ",", Columns = 6, Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+				    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars = true]),
+				    ChangedType = Table.TransformColumnTypes(PromotedHeaders, {{"date_key", Int64.Type}, {"reporting_period", type date}, {"year", Int64.Type}, {"quarter", type text}, {"month", Int64.Type}, {"period_label", type text}})
+				in
+				    ChangedType

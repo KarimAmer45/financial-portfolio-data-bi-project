@@ -1,5 +1,26 @@
+# Python
 __pycache__/
+*.pyc
 .ipynb_checkpoints/
 .venv/
 venv/
-*.pyc
+
+# Local artifacts
+*.log
+logs/
+*.tmp
+*.bak
+~$*
+
+# dbt / DuckDB
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+dbt/.user.yml
+*.duckdb
+*.duckdb.wal
+
+# Power BI local files
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+*.pbix.tmp

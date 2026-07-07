@@ -1,0 +1,23 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["DataRoot", "fact_lending_activity", "dim_lender", "dim_geography", "dim_date", "data_quality_report", "rejected_records"]
+
+ref table fact_lending_activity
+
+ref table dim_lender
+
+ref table dim_geography
+
+ref table dim_date
+
+ref table data_quality_report
+
+ref table rejected_records

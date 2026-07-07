@@ -1,0 +1,11 @@
+relationship Relationship1
+	fromColumn: fact_lending_activity.lender_key
+	toColumn: dim_lender.lender_key
+
+relationship Relationship2
+	fromColumn: fact_lending_activity.geography_key
+	toColumn: dim_geography.geography_key
+
+relationship Relationship3
+	fromColumn: fact_lending_activity.date_key
+	toColumn: dim_date.date_key

@@ -1,0 +1,18 @@
+-- Upload local CSVs into @RAW.SBA_STAGE before running these commands.
+-- Example CLI:
+-- snowsql -q "PUT file://data/processed/sba_7a_lender_activity_fy2024.csv @RAW.SBA_STAGE AUTO_COMPRESS=TRUE"
+
+COPY INTO RAW.SBA_7A_LENDER_ACTIVITY_FY2024
+FROM @RAW.SBA_STAGE/sba_7a_lender_activity_fy2024.csv.gz
+FILE_FORMAT = RAW.CSV_STANDARD
+ON_ERROR = 'ABORT_STATEMENT';
+
+COPY INTO RAW.SBA_7A_LENDER_COUNTY_ACTIVITY_FY2024
+FROM @RAW.SBA_STAGE/sba_7a_lender_county_activity_fy2024.csv.gz
+FILE_FORMAT = RAW.CSV_STANDARD
+ON_ERROR = 'ABORT_STATEMENT';
+
+COPY INTO RAW.SBA_7A_DISTRICT_OFFICE_ACTIVITY_FY2024
+FROM @RAW.SBA_STAGE/sba_7a_district_office_activity_fy2024.csv.gz
+FILE_FORMAT = RAW.CSV_STANDARD
+ON_ERROR = 'ABORT_STATEMENT';
