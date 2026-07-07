@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: dim_lender
+    description: Lender dimension with a surrogate key.
+    columns:
+      - name: lender_key
+        tests: [unique, not_null]
+      - name: lender_name
+        tests: [not_null]
+
+  - name: dim_geography
+    description: Project state/county dimension with census region.
+    columns:
+      - name: geography_key
+        tests: [unique, not_null]
+      - name: state
+        tests: [not_null]
+      - name: region
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Northeast, Midwest, South, West, Territory, Unknown]
+
+  - name: dim_date
+    description: Reporting period dimension (single FY2024 year-end snapshot).
+    columns:
+      - name: date_key
+        tests: [unique, not_null]
+
+  - name: fct_lending_activity
+    description: Lending activity at lender x project county x period grain.
+    columns:
+      - name: lender_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_lender')
+                field: lender_key
+      - name: geography_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_geography')
+                field: geography_key
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_key
+      - name: approved_dollars
+        tests: [not_null]
+
+  - name: mart_executive_kpis
+    description: One-row KPI table for the executive overview page.

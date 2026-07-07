@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_lender_activity
+    description: One row per lender with typed activity measures.
+    columns:
+      - name: lender_name
+        tests: [not_null]
+      - name: approved_loan_count
+        tests: [not_null]
+      - name: approved_dollars
+        tests: [not_null]
+      - name: guaranty_dollars
+        tests: [not_null]
+
+  - name: stg_lender_county_activity
+    description: One row per lender and project county. Fact-table grain.
+    columns:
+      - name: lender_name
+        tests: [not_null]
+      - name: project_state
+        tests: [not_null]
+      - name: project_county
+        tests: [not_null]
+      - name: approved_dollars
+        tests: [not_null]
+
+  - name: stg_district_activity
+    description: One row per lender and SBA district office.
+    columns:
+      - name: lender_name
+        tests: [not_null]
+      - name: district_office_name
+        tests: [not_null]
