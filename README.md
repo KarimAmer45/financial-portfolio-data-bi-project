@@ -1,73 +1,102 @@
 # SBA 7(a) Lender Activity Data & BI Project
 
-This project demonstrates a compact Business Intelligence workflow using official U.S. Small Business Administration open data. It cleans an SBA 7(a) lender activity workbook, exports analysis-ready CSV files, runs SQL queries, calculates KPIs, and creates a short business readout with visuals.
+End-to-end financial Data & BI workflow using Python, SQL, a warehouse-style star schema, automated data-quality checks, and Power BI-ready reporting assets.
 
-The dataset is public, aggregated SBA lending activity data for FY2024. It is not borrower-level credit performance data, so the analysis focuses on lender concentration, geographic exposure, approved loan volume, approved dollars, average loan size, and SBA guaranty exposure.
+## Business Problem
 
-## Data Source
+SBA 7(a) lending activity is spread across lenders, geographies, and district office views. This project turns the public SBA workbook into a clean reporting layer that helps answer: who drives approved dollars, where activity is concentrated, how much exposure is guaranteed by the SBA, and whether the reporting data is reliable enough for dashboarding.
+
+## Data Source and Grain
 
 - Source: U.S. Small Business Administration Open Data
 - Dataset: SBA 7(a) & 504 Activity Reports, FY2024 Year End
-- Raw file used: `lender7aactivity_fy2024_20240930.xlsx`
+- Raw file: `data/raw/lender7aactivity_fy2024_20240930.xlsx`
 - Source URL: https://web.data.sba.gov/en/dataset/7-a-504-activity-reports-fy2024-year-end
+- Fact grain: lender by project county by reporting period
 
-## Tools Used
+The source is aggregated lender activity, not borrower-level repayment or default data. The project does not pretend to have individual borrower loans, credit scores, delinquency, or default flags.
 
-- Python
-- pandas and numpy
-- openpyxl
-- SQLite SQL
-- Pillow for PNG chart generation
+## Interview Numbers
 
-## Workflow
-
-1. Load the raw SBA workbook from `data/raw/`.
-2. Clean and standardize lender, county, and district office sheets.
-3. Export cleaned CSV files to `data/processed/`.
-4. Load the cleaned tables into SQLite.
-5. Run SQL queries for KPIs, lender concentration, geographic exposure, and district office activity.
-6. Create BI-style visuals and summarize business insights.
-
-## Data Cleaning Summary
-
-| Table | Raw rows | Clean rows | Notes |
-| --- | ---: | ---: | --- |
-| Lender activity | 1,472 | 1,472 | Standardized fields and numeric types |
-| Lender-county activity | 20,846 | 20,846 | Standardized lender, state, county, and dollar fields |
-| District office activity | 6,106 | 6,106 | Standardized district office fields |
-
-The selected SBA sheets had no missing values or duplicate rows after cleaning.
-
-## Key Business Questions
-
-- Which lenders account for the largest approved SBA 7(a) dollar volume?
-- How concentrated is activity among the top lenders?
-- Which project states and counties drive the most approved dollars?
-- Which SBA district offices show the highest activity?
-- What is the overall SBA guaranty rate?
-- What is the average approved loan size?
-
-## KPI Summary
-
-| KPI | Value |
+| Metric | Value |
 | --- | ---: |
 | Approved loans | 70,242 |
 | Approved dollars | $31.12B |
-| SBA guaranty dollars | $22.75B |
-| Active lenders | 1,472 |
-| Project states/territories | 54 |
-| Project counties | 2,402 |
-| Average loan size | $443K |
-| SBA guaranty rate | 73.08% |
 | Top 10 lender share | 33.15% |
+
+## Core Workflow
+
+1. Clean raw SBA workbook.
+2. Run SQL analysis.
+3. Generate KPIs and visuals.
+4. Export star-schema tables for Power BI.
+5. Produce data-quality checks and rejected-record output.
+
+## Technology Stack
+
+- Python: workbook ingestion, schema validation, star-schema generation, data-quality checks, visuals.
+- SQL: KPI, lender concentration, geography, and district office analysis.
+- Power BI-ready layer: fact/dimension CSVs, relationships, DAX measures, dashboard blueprint.
+- dbt-inspired SQL: staging, intermediate, and marts model folders.
+- Snowflake-ready SQL: schemas, table DDL, and sample `COPY INTO` loading logic.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    A["SBA Open Data XLSX"] --> B["Python validation"]
+    B --> C["Processed CSVs"]
+    C --> D["Star schema tables"]
+    D --> E["SQL KPI analysis"]
+    D --> F["Power BI-ready model"]
+    B --> G["Data-quality report"]
+    D --> H["Snowflake-ready design"]
+```
+
+Detailed architecture and model diagram: [docs/architecture.md](docs/architecture.md)
+
+## Star Schema Outputs
+
+| Table | Output |
+| --- | --- |
+| FactLendingActivity | `data/warehouse/fact_lending_activity.csv` |
+| DimLender | `data/warehouse/dim_lender.csv` |
+| DimGeography | `data/warehouse/dim_geography.csv` |
+| DimDate | `data/warehouse/dim_date.csv` |
+
+## Data Quality
+
+The pipeline validates missing required values, duplicate rows, non-negative amounts, SBA guaranty amounts not exceeding approved dollars, valid state codes, unique dimension keys, and fact-to-dimension relationships.
+
+Outputs:
+
+- `data/quality/data_quality_report.csv`
+- `data/quality/rejected_records.csv`
+
+Current result: all checks pass and rejected record count is 0.
+
+## Power BI Assets
+
+Power BI Desktop is not available in this environment, so no `.pbix` file is committed. The repo includes the data model, DAX measures, and dashboard page blueprint needed to build the report.
+
+- [Power BI model notes](powerbi/README.md)
+- [DAX measures](powerbi/dax_measures.md)
+- [Dashboard page blueprint](powerbi/dashboard_pages.md)
+
+Recommended report pages:
+
+1. Executive Overview
+2. Lender Analysis
+3. Geographic Analysis
+4. Data Quality
 
 ## Key Insights
 
-- SBA 7(a) FY2024 activity totals $31.1B across 70,242 approved loans and 1,472 lenders.
-- SBA guaranty exposure totals $22.7B, equal to 73.08% of approved dollars.
-- The top 10 lenders account for 33.15% of approved dollars, showing meaningful but not extreme lender concentration.
-- Newtek Bank, National Association is the largest lender by approved dollars at $2.1B, representing 6.74% of total activity.
-- California is the largest project state at $4.0B, representing 12.93% of approved dollars.
+- SBA 7(a) FY2024 activity totals $31.12B across 70,242 approved loans and 1,472 lenders.
+- SBA guaranty exposure totals $22.75B, equal to 73.08% of approved dollars.
+- The top 10 lenders account for 33.15% of approved dollars.
+- Newtek Bank, National Association is the largest lender by approved dollars at $2.1B.
+- California is the largest project state at $4.0B.
 - Los Angeles County, CA is the largest county exposure at $1.2B.
 - South Florida District Office is the largest SBA district office view at $2.0B.
 
@@ -85,22 +114,29 @@ The selected SBA sheets had no missing values or duplicate rows after cleaning.
 
 ```text
 financial-portfolio-data-bi-project/
+|-- config/
+|   `-- column_mappings.json
 |-- data/
 |   |-- raw/
-|   |   `-- lender7aactivity_fy2024_20240930.xlsx
-|   `-- processed/
-|       |-- sba_7a_lender_activity_fy2024.csv
-|       |-- sba_7a_lender_county_activity_fy2024.csv
-|       `-- sba_7a_district_office_activity_fy2024.csv
-|-- sql/
-|   `-- analysis_queries.sql
+|   |-- processed/
+|   |-- warehouse/
+|   `-- quality/
+|-- docs/
+|   `-- architecture.md
+|-- models/
+|   |-- staging/
+|   |-- intermediate/
+|   `-- marts/
 |-- notebooks/
 |   `-- analysis.py
+|-- powerbi/
+|   |-- README.md
+|   |-- dashboard_pages.md
+|   `-- dax_measures.md
+|-- snowflake/
+|-- sql/
+|-- tests/
 |-- visuals/
-|   |-- kpi_summary.png
-|   |-- top_lenders.png
-|   |-- top_project_states.png
-|   `-- top_district_offices.png
 |-- requirements.txt
 `-- README.md
 ```
@@ -110,10 +146,21 @@ financial-portfolio-data-bi-project/
 ```bash
 pip install -r requirements.txt
 python notebooks/analysis.py
+python -m unittest discover -s tests
 ```
 
-Running the script regenerates the cleaned CSV exports, executes the SQL analysis, prints the KPI summary and insights, and refreshes the visuals.
+Running the pipeline regenerates processed CSVs, warehouse tables, data-quality reports, SQL KPI outputs, and visuals.
 
-## Relevance to Data & BI
+## Limitations
 
-This project reflects Data and Business Intelligence skills including public data sourcing, spreadsheet ingestion, data cleaning, SQL querying, KPI development, exposure analysis, visualization, and clear business communication.
+- Data is aggregated SBA lender activity, not individual borrower-level credit performance.
+- District office activity is a separate aggregation and is not joined into the county-grain fact table.
+- Power BI assets are dashboard-ready specifications and model outputs, not a committed `.pbix`.
+- Snowflake SQL is migration-ready design, not a verified live Snowflake deployment.
+
+## Future Improvements
+
+- Build the `.pbix` report in Power BI Desktop.
+- Convert `models/` into an executable dbt project.
+- Load `data/warehouse/` into Snowflake and run transformations there.
+- Add CI to run unit tests and data-quality checks on every commit.
