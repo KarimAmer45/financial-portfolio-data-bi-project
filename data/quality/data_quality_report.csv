@@ -1,0 +1,20 @@
+check_name,status,failed_count,details
+sba_lender_activity_missing_required_values,pass,0,No nulls expected after cleaning selected SBA source sheets.
+sba_lender_activity_duplicate_rows,pass,0,Exact duplicate source rows should not appear after cleaning.
+sba_lender_activity_non_negative_amounts,pass,0,Approved loans and dollars must be non-negative.
+sba_lender_activity_guaranty_not_above_approved,pass,0,SBA guaranty dollars should not exceed approved dollars.
+sba_lender_county_activity_missing_required_values,pass,0,No nulls expected after cleaning selected SBA source sheets.
+sba_lender_county_activity_duplicate_rows,pass,0,Exact duplicate source rows should not appear after cleaning.
+sba_lender_county_activity_non_negative_amounts,pass,0,Approved loans and dollars must be non-negative.
+sba_lender_county_activity_guaranty_not_above_approved,pass,0,SBA guaranty dollars should not exceed approved dollars.
+sba_district_office_activity_missing_required_values,pass,0,No nulls expected after cleaning selected SBA source sheets.
+sba_district_office_activity_duplicate_rows,pass,0,Exact duplicate source rows should not appear after cleaning.
+sba_district_office_activity_non_negative_amounts,pass,0,Approved loans and dollars must be non-negative.
+sba_district_office_activity_guaranty_not_above_approved,pass,0,SBA guaranty dollars should not exceed approved dollars.
+dim_lender_unique_key,pass,0,Each lender dimension key must be unique.
+dim_geography_unique_key,pass,0,Each geography dimension key must be unique.
+fact_lender_key_not_null,pass,0,Every fact row must match DimLender.
+fact_geography_key_not_null,pass,0,Every fact row must match DimGeography.
+dim_geography_valid_state_codes,pass,0,Project states should map to valid U.S. state or territory codes.
+fact_non_negative_amounts,pass,0,Fact table financial fields must be non-negative.
+fact_guaranty_not_above_approved,pass,0,Fact guaranty dollars should not exceed approved dollars.
