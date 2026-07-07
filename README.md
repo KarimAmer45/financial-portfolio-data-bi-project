@@ -1,166 +1,147 @@
-# SBA 7(a) Lender Activity Data & BI Project
+# SBA 7(a) Lending Activity - Data & BI Project
 
-End-to-end financial Data & BI workflow using Python, SQL, a warehouse-style star schema, automated data-quality checks, and Power BI-ready reporting assets.
+End-to-end BI workflow over public SBA lending data: Python ingest with
+data-quality gates, a star-schema reporting layer, a dbt project that runs
+the same models on DuckDB, a Power BI report, and a Snowflake migration
+design.
 
 ## Business Problem
 
-SBA 7(a) lending activity is spread across lenders, geographies, and district office views. This project turns the public SBA workbook into a clean reporting layer that helps answer: who drives approved dollars, where activity is concentrated, how much exposure is guaranteed by the SBA, and whether the reporting data is reliable enough for dashboarding.
+SBA 7(a) activity is published as a multi-sheet Excel workbook, aggregated
+three different ways (lender, lender by project county, lender by district
+office). That format is fine for downloading and skimming, but it can't
+answer portfolio questions directly: who drives approved dollars, how
+concentrated is the lender base, where is exposure clustered geographically,
+and how much of it is federally guaranteed. This project turns the workbook
+into a tested reporting layer that answers those questions and is honest
+about data reliability while doing it.
 
 ## Data Source and Grain
 
-- Source: U.S. Small Business Administration Open Data
-- Dataset: SBA 7(a) & 504 Activity Reports, FY2024 Year End
+- Source: [SBA 7(a) & 504 Activity Reports, FY2024 Year End](https://web.data.sba.gov/en/dataset/7-a-504-activity-reports-fy2024-year-end) (SBA Open Data)
 - Raw file: `data/raw/lender7aactivity_fy2024_20240930.xlsx`
-- Source URL: https://web.data.sba.gov/en/dataset/7-a-504-activity-reports-fy2024-year-end
-- Fact grain: lender by project county by reporting period
+- Fact grain: lender x project county x reporting period
 
-The source is aggregated lender activity, not borrower-level repayment or default data. The project does not pretend to have individual borrower loans, credit scores, delinquency, or default flags.
+The source is aggregated lender activity. There is no borrower-level detail
+(no defaults, delinquency, or credit scores), and the model keeps that grain
+rather than implying detail the SBA doesn't publish.
 
-## Interview Numbers
+## How Data Moves
 
-| Metric | Value |
-| --- | ---: |
-| Approved loans | 70,242 |
-| Approved dollars | $31.12B |
-| Top 10 lender share | 33.15% |
+1. `src/run_pipeline.py` reads the workbook sheets defined in
+   `config/column_mappings.json`, cleans them, and rejects rows with missing
+   required fields or invalid amounts (with reasons, to
+   `data/quality/rejected_records.csv`).
+2. Cleaned tables land in `data/processed/`, and the star schema
+   (fact + dimensions) in `data/warehouse/`.
+3. Data-quality checks run over both layers and write
+   `data/quality/data_quality_report.csv`.
+4. Named SQL queries in `sql/analysis_queries.sql` produce the KPI and
+   concentration analysis, and matplotlib renders the charts in `visuals/`.
+5. The dbt project in `dbt/` rebuilds the same star schema on DuckDB with
+   schema tests - the warehouse-native version of step 2.
+6. Power BI (`powerbi/sba_lending.pbip`) loads the warehouse CSVs into a
+   model with relationships and DAX measures already defined.
 
-## Core Workflow
+Architecture and model diagrams: [docs/architecture.md](docs/architecture.md)
 
-1. Clean raw SBA workbook.
-2. Run SQL analysis.
-3. Generate KPIs and visuals.
-4. Export star-schema tables for Power BI.
-5. Produce data-quality checks and rejected-record output.
+## KPI Definitions
 
-## Technology Stack
-
-- Python: workbook ingestion, schema validation, star-schema generation, data-quality checks, visuals.
-- SQL: KPI, lender concentration, geography, and district office analysis.
-- Power BI-ready layer: fact/dimension CSVs, relationships, DAX measures, dashboard blueprint.
-- dbt-inspired SQL: staging, intermediate, and marts model folders.
-- Snowflake-ready SQL: schemas, table DDL, and sample `COPY INTO` loading logic.
-
-## Architecture
-
-```mermaid
-flowchart LR
-    A["SBA Open Data XLSX"] --> B["Python validation"]
-    B --> C["Processed CSVs"]
-    C --> D["Star schema tables"]
-    D --> E["SQL KPI analysis"]
-    D --> F["Power BI-ready model"]
-    B --> G["Data-quality report"]
-    D --> H["Snowflake-ready design"]
-```
-
-Detailed architecture and model diagram: [docs/architecture.md](docs/architecture.md)
-
-## Star Schema Outputs
-
-| Table | Output |
+| KPI | Definition |
 | --- | --- |
-| FactLendingActivity | `data/warehouse/fact_lending_activity.csv` |
-| DimLender | `data/warehouse/dim_lender.csv` |
-| DimGeography | `data/warehouse/dim_geography.csv` |
-| DimDate | `data/warehouse/dim_date.csv` |
+| Total Approved Dollars | Sum of gross approved loan dollars |
+| Total Loan Count | Sum of approved loan counts |
+| Average Loan Size | Approved dollars / loan count |
+| Guaranty Rate | SBA-guaranteed dollars / approved dollars |
+| Lender Share | A lender's approved dollars / grand total |
+| Top 10 Lender Share | Approved dollars of the 10 largest lenders / grand total |
 
-## Data Quality
+## What the Data Shows (FY2024)
 
-The pipeline validates missing required values, duplicate rows, non-negative amounts, SBA guaranty amounts not exceeding approved dollars, valid state codes, unique dimension keys, and fact-to-dimension relationships.
-
-Outputs:
-
-- `data/quality/data_quality_report.csv`
-- `data/quality/rejected_records.csv`
-
-Current result: all checks pass and rejected record count is 0.
-
-## Power BI Assets
-
-Power BI Desktop is not available in this environment, so no `.pbix` file is committed. The repo includes the data model, DAX measures, and dashboard page blueprint needed to build the report.
-
-- [Power BI model notes](powerbi/README.md)
-- [DAX measures](powerbi/dax_measures.md)
-- [Dashboard page blueprint](powerbi/dashboard_pages.md)
-
-Recommended report pages:
-
-1. Executive Overview
-2. Lender Analysis
-3. Geographic Analysis
-4. Data Quality
-
-## Key Insights
-
-- SBA 7(a) FY2024 activity totals $31.12B across 70,242 approved loans and 1,472 lenders.
-- SBA guaranty exposure totals $22.75B, equal to 73.08% of approved dollars.
-- The top 10 lenders account for 33.15% of approved dollars.
-- Newtek Bank, National Association is the largest lender by approved dollars at $2.1B.
-- California is the largest project state at $4.0B.
-- Los Angeles County, CA is the largest county exposure at $1.2B.
-- South Florida District Office is the largest SBA district office view at $2.0B.
-
-## Visuals
+Approved activity totals $31.1B across 70,242 loans from 1,472 lenders, with
+$22.7B (73.1%) carrying an SBA guaranty. Concentration is real but not
+extreme: the top 10 lenders hold 33.2% of approved dollars, led by Newtek
+Bank at $2.1B, and no single lender exceeds 7% of the market. California is
+the largest project state at $4.0B (12.9% of the total), and Los Angeles
+County alone accounts for $1.2B. Newtek also has the widest footprint,
+lending across 51 states and territories.
 
 ![KPI summary](visuals/kpi_summary.png)
 
 ![Top lenders](visuals/top_lenders.png)
 
+![Lender concentration](visuals/lender_concentration.png)
+
 ![Top project states](visuals/top_project_states.png)
 
 ![Top district offices](visuals/top_district_offices.png)
 
-## Repository Structure
+## Data Quality
 
-```text
-financial-portfolio-data-bi-project/
-|-- config/
-|   `-- column_mappings.json
-|-- data/
-|   |-- raw/
-|   |-- processed/
-|   |-- warehouse/
-|   `-- quality/
-|-- docs/
-|   `-- architecture.md
-|-- models/
-|   |-- staging/
-|   |-- intermediate/
-|   `-- marts/
-|-- notebooks/
-|   `-- analysis.py
-|-- powerbi/
-|   |-- README.md
-|   |-- dashboard_pages.md
-|   `-- dax_measures.md
-|-- snowflake/
-|-- sql/
-|-- tests/
-|-- visuals/
-|-- requirements.txt
-`-- README.md
-```
+Cleaning rejects rows rather than silently dropping them, and every run
+re-validates: missing required values, duplicates, non-negative amounts,
+guaranty not exceeding approved dollars, unique dimension keys, non-null
+fact foreign keys, valid state codes, and fact-to-dimension integrity.
+The current source passes all checks with zero rejected records - the value
+of the gates is that a future workbook that doesn't pass won't quietly
+poison the dashboard.
 
-## How to Run
+The same rules exist twice deliberately: procedurally in
+`src/sba_bi/quality.py` for the operational pipeline, and declaratively as
+dbt tests for the warehouse path.
+
+## Technology
+
+- Python (pandas, matplotlib): ingest, validation, star schema, charts
+- SQL: SQLite for local analysis queries; DuckDB under dbt
+- dbt: staging / intermediate / marts layers with schema and singular tests
+- Power BI: PBIP project with semantic model and DAX measures
+- Snowflake: schema DDL, `COPY INTO` loading, migration notes (design only)
+
+## Setup
 
 ```bash
 pip install -r requirements.txt
-python notebooks/analysis.py
-python -m unittest discover -s tests
+
+python src/run_pipeline.py            # full pipeline
+python -m unittest discover -s tests  # unit + integration tests
+
+pip install dbt-duckdb
+dbt build --project-dir dbt --profiles-dir dbt   # from the repo root
 ```
 
-Running the pipeline regenerates processed CSVs, warehouse tables, data-quality reports, SQL KPI outputs, and visuals.
+Then open `powerbi/sba_lending.pbip` in Power BI Desktop (set the `DataRoot`
+parameter to this repo's `data/` folder if prompted). Page layout guidance:
+[powerbi/dashboard_pages.md](powerbi/dashboard_pages.md).
+
+## Repository Structure
+
+```text
+config/          workbook sheet and column mappings
+data/            raw workbook, processed CSVs, warehouse tables, quality outputs
+dbt/             dbt project (DuckDB) with tests and seeds
+docs/            architecture and model diagrams
+powerbi/         sba_lending.pbip, model docs, DAX reference, page layout
+snowflake/       schemas, DDL, COPY INTO examples
+sql/             named analysis queries run by the pipeline
+src/             pipeline package (sba_bi) and entry point
+tests/           unit tests (synthetic data) and integration tests
+visuals/         charts rendered by the pipeline
+```
 
 ## Limitations
 
-- Data is aggregated SBA lender activity, not individual borrower-level credit performance.
-- District office activity is a separate aggregation and is not joined into the county-grain fact table.
-- Power BI assets are dashboard-ready specifications and model outputs, not a committed `.pbix`.
-- Snowflake SQL is migration-ready design, not a verified live Snowflake deployment.
+- Aggregated activity data, so no default rates, credit quality, or
+  borrower-level analysis - this measures origination activity, not risk.
+- One reporting period (FY2024 year end); trend views need more snapshots.
+- The Snowflake layer is written and organized for Snowflake but hasn't been
+  executed against a live account.
+- District office totals come from a separate source aggregation and don't
+  join to the county-grain fact table.
 
-## Future Improvements
+## Next Steps
 
-- Build the `.pbix` report in Power BI Desktop.
-- Convert `models/` into an executable dbt project.
-- Load `data/warehouse/` into Snowflake and run transformations there.
-- Add CI to run unit tests and data-quality checks on every commit.
+- Load a second fiscal year to unlock trend analysis in `dim_date`.
+- Point the dbt profile at Snowflake and materialize the marts there.
+- CI that runs the unit tests and `dbt build` on every push.
+- Finish the Power BI page layouts and publish to the service.

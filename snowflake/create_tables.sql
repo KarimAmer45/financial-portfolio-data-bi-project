@@ -46,7 +46,6 @@ CREATE OR REPLACE TABLE MARTS.DIM_GEOGRAPHY (
     geography_key NUMBER(18, 0),
     state STRING,
     county STRING,
-    district STRING,
     region STRING
 );
 
