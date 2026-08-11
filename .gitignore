@@ -24,3 +24,4 @@ dbt/.user.yml
 **/.pbi/localSettings.json
 **/.pbi/cache.abf
 *.pbix.tmp
+.claude/
